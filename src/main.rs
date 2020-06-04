@@ -4,26 +4,18 @@ use raytrace::vec3::{
     Color,
     Point3,
     Vec3,
-    dot,
     unit_vector,
 };
 use raytrace::ray::Ray;
-use raytrace::util::write_color;
+use raytrace::util::{write_color, INFINITY};
+use raytrace::hittable::{HitRecord, HittableList};
+use raytrace::sphere::Sphere;
 
 
-fn hit_sphere(center: Point3, radius: f32, r: &Ray) -> bool {
-    let oc = r.origin - center;
-    let a = dot(r.direction, r.direction);
-    let b = 2.0 * dot(oc, r.direction);
-    let c = dot(oc, oc) - radius*radius;
-    let discriminant = b.powi(2) - 4.0*a*c;
-    discriminant > 0.0
-}
-
-
-fn ray_color(r: &Ray) -> Color {
-    if hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r) {
-        return Color::new(1.0, 0.0, 0.0)
+fn ray_color(r: &Ray, world: &HittableList) -> Color {
+    let mut rec = HitRecord::new();
+    if world.hit(r, 0.0, INFINITY, &mut rec) {
+        return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0))
     }
     let unit_direction = unit_vector(r.direction);
     let t = 0.5 * (unit_direction.y + 1.0);
@@ -34,6 +26,9 @@ fn ray_color(r: &Ray) -> Color {
 
 
 fn main() {
+    let stdout = stdout();
+    let mut stdout = stdout.lock();
+
     let aspect_ratio = 16.0 / 9.0;
     let image_width: i32 = 384;
     let image_height: i32 = (image_width as f32 / aspect_ratio) as i32;
@@ -53,8 +48,9 @@ fn main() {
         - vertical/2.0
         - Vec3::new(0.0, 0.0, focal_length);
 
-    let stdout = stdout();
-    let mut stdout = stdout.lock();
+    let mut world = HittableList::new();
+    world.add(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5));
+    world.add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
 
     for j in (0..image_height).rev() {
         eprint!("\rScanlines remaining: {}", j);
@@ -66,7 +62,7 @@ fn main() {
                 + vertical*v
                 - origin;
             let r = Ray::new(origin, direction);
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
             write_color(&mut stdout, pixel_color);
         }
     }
