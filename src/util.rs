@@ -23,9 +23,9 @@ fn clamp(x: f32, min: f32, max: f32) -> f32 {
 pub fn write_color<T>(stream: &mut T, pixel_color: Color,
                       samples_per_pixel: i32) where T: Write {
     let scale = 1.0 / samples_per_pixel as f32;
-    let r = pixel_color.x * scale;
-    let g = pixel_color.y * scale;
-    let b = pixel_color.z * scale;
+    let r = (pixel_color.x * scale).sqrt();
+    let g = (pixel_color.y * scale).sqrt();
+    let b = (pixel_color.z * scale).sqrt();
 
     let ir = (256.0 * clamp(r, 0.0, 0.999)) as i32;
     let ig = (256.0 * clamp(g, 0.0, 0.999)) as i32;
@@ -37,7 +37,7 @@ pub fn write_color<T>(stream: &mut T, pixel_color: Color,
 pub fn random_number() -> f32 {
     let mut rng = thread_rng();
     let the_number: f32 = rng.gen();
-    the_number - 0.0001
+    the_number
 }
 
 pub fn random_range(min: f32, max: f32) -> f32 {

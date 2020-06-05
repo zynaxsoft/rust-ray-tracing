@@ -1,6 +1,6 @@
 use std::io::stdout;
 
-use raytrace::vec3::{Color, Point3, unit_vector};
+use raytrace::vec3::{Vec3, Color, Point3, unit_vector};
 use raytrace::ray::Ray;
 use raytrace::util::{write_color, INFINITY, random_number};
 use raytrace::hittable::{HitRecord, HittableList};
@@ -8,10 +8,17 @@ use raytrace::sphere::Sphere;
 use raytrace::camera::Camera;
 
 
-fn ray_color(r: &Ray, world: &HittableList) -> Color {
+fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     let mut rec = HitRecord::new();
-    if world.hit(r, 0.0, INFINITY, &mut rec) {
-        return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0))
+    if depth <= 0 {
+        return Color::new(0.0, 0.0, 0.0)
+    }
+    if world.hit(r, 0.001, INFINITY, &mut rec) {
+        // Lambertian diffuse
+        // let target = rec.p + rec.normal + Vec3::random_unit_vector();
+        // Uniform scatter diffuse
+        let target = rec.p + rec.normal + Vec3::random_in_hemisphere(rec.normal);
+        return 0.5 * ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1)
     }
     let unit_direction = unit_vector(r.direction);
     let t = 0.5 * (unit_direction.y + 1.0);
@@ -29,6 +36,7 @@ fn main() {
     let image_width: i32 = 384;
     let image_height: i32 = (image_width as f32 / aspect_ratio) as i32;
     let samples_per_pixel: i32 = 5;
+    let max_depth = 50;
 
     // PPM header
     println!("P3\n{} {}\n255", image_width, image_height);
@@ -48,7 +56,7 @@ fn main() {
                 let u = (i as f32 + random_number()) / (image_width - 1) as f32;
                 let v = (j as f32 + random_number()) / (image_height - 1) as f32;
                 let r = cam.get_ray(u, v);
-                pixel_color += ray_color(&r, &world);
+                pixel_color += ray_color(&r, &world, max_depth);
             }
             write_color(&mut stdout, pixel_color, samples_per_pixel);
         }

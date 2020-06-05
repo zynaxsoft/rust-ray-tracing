@@ -1,5 +1,7 @@
 use std::ops::*;
 
+use crate::util::{random_number, random_range};
+
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
@@ -11,6 +13,46 @@ pub struct Vec3 {
 impl Vec3 {
     pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
         Vec3 {x, y, z}
+    }
+
+    pub fn random() -> Vec3 {
+        let x = random_number();
+        let y = random_number();
+        let z = random_number();
+        Vec3::new(x, y, z)
+    }
+
+    pub fn random_range(min: f32, max: f32) -> Vec3 {
+        let x = random_range(min, max);
+        let y = random_range(min, max);
+        let z = random_range(min, max);
+        Vec3::new(x, y, z)
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let p = Vec3::random_range(-1.0, 1.0);
+            if p.length_squared() >= 1.0 {
+                continue
+            }
+            return p
+        }
+    }
+
+    pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
+        let in_unit_sphere = Vec3::random_in_unit_sphere();
+        if dot(in_unit_sphere, normal) > 0.0 {
+            in_unit_sphere
+        } else {
+            -in_unit_sphere
+        }
+    }
+
+    pub fn random_unit_vector() -> Vec3 {
+        let a = random_range(0.0, 2.0 * crate::util::PI);
+        let z = random_range(-1.0, 1.0);
+        let r = (1.0 - z.powi(2)).sqrt();
+        Vec3::new(r*a.cos(), r*a.sin(), z)
     }
 
     pub fn length_squared(&self) -> f32 {
