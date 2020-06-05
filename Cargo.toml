@@ -11,3 +11,4 @@ name = "raytrace"
 path = "src/lib.rs"
 
 [dependencies]
+rand = "0.7"
