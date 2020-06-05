@@ -55,6 +55,10 @@ impl Vec3 {
         Vec3::new(r*a.cos(), r*a.sin(), z)
     }
 
+    pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+        v - (2.0 * dot(v, n) * n)
+    }
+
     pub fn length_squared(&self) -> f32 {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }

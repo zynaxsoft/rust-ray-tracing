@@ -1,19 +1,24 @@
+use std::rc::Rc;
+
 use crate::ray::Ray;
+use crate::material::Material;
 use crate::vec3::{Vec3, Point3, dot};
 
 
-pub struct HitRecord {
+pub struct HitRecord<'a> {
     pub t: f32,
     pub p: Point3,
+    pub mat_ptr: Option<Rc<dyn Material + 'a>>,
     pub normal: Vec3,
     pub front_face: bool,
 }
 
-impl HitRecord {
-    pub fn new() -> HitRecord {
+impl<'a> HitRecord<'a> {
+    pub fn new() -> HitRecord<'a> {
         HitRecord {
             t: 0.0,
             p: Point3::new(0.0, 0.0, 0.0),
+            mat_ptr: None,
             normal: Vec3::new(0.0, 0.0, 0.0),
             front_face: false,
         }

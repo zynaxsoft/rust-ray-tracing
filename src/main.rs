@@ -1,9 +1,11 @@
 use std::io::stdout;
+use std::rc::Rc;
 
-use raytrace::vec3::{Vec3, Color, Point3, unit_vector};
+use raytrace::vec3::{Color, Point3, unit_vector};
 use raytrace::ray::Ray;
 use raytrace::util::{write_color, INFINITY, random_number};
 use raytrace::hittable::{HitRecord, HittableList};
+use raytrace::material::{Metal, Lambertian};
 use raytrace::sphere::Sphere;
 use raytrace::camera::Camera;
 
@@ -13,13 +15,17 @@ fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     if depth <= 0 {
         return Color::new(0.0, 0.0, 0.0)
     }
+
     if world.hit(r, 0.001, INFINITY, &mut rec) {
-        // Lambertian diffuse
-        // let target = rec.p + rec.normal + Vec3::random_unit_vector();
-        // Uniform scatter diffuse
-        let target = rec.p + rec.normal + Vec3::random_in_hemisphere(rec.normal);
-        return 0.5 * ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1)
+        let mut attenuation = Color::new(0.0, 0.0, 0.0);
+        let mut scattered = Ray::new_zero();
+        let mat_ptr = Rc::clone(rec.mat_ptr.as_ref().unwrap());
+        if mat_ptr.scatter(r, &rec, &mut attenuation, &mut scattered) {
+            return attenuation * ray_color(&scattered, world, depth - 1)
+        }
+        return Color::new(0.0, 0.0, 0.0)
     }
+
     let unit_direction = unit_vector(r.direction);
     let t = 0.5 * (unit_direction.y + 1.0);
     return
@@ -42,8 +48,30 @@ fn main() {
     println!("P3\n{} {}\n255", image_width, image_height);
 
     let mut world = HittableList::new();
-    world.add(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5));
-    world.add(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0));
+    world.add(Sphere::new(
+            Point3::new(0.0, 0.0, -1.0),
+            0.5,
+            Rc::new(Lambertian::new(Color::new(0.7, 0.3, 0.3))),
+            )
+        );
+    world.add(Sphere::new(
+            Point3::new(0.0, -100.5, -1.0),
+            100.0,
+            Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0))),
+            )
+        );
+    world.add(Sphere::new(
+            Point3::new(1.0, 0.0, -1.0),
+            0.5,
+            Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.3)),
+            )
+        );
+    world.add(Sphere::new(
+            Point3::new(-1.0, 0.0, -1.0),
+            0.5,
+            Rc::new(Metal::new(Color::new(0.8, 0.8, 0.8), 1.0)),
+            )
+        );
 
     let cam = Camera::new();
 
