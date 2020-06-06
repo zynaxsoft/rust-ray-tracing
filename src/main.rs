@@ -5,7 +5,7 @@ use raytrace::vec3::{Color, Point3, unit_vector};
 use raytrace::ray::Ray;
 use raytrace::util::{write_color, INFINITY, random_number};
 use raytrace::hittable::{HitRecord, HittableList};
-use raytrace::material::{Metal, Lambertian};
+use raytrace::material::{Metal, Lambertian, Dielectric};
 use raytrace::sphere::Sphere;
 use raytrace::camera::Camera;
 
@@ -41,7 +41,7 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let image_width: i32 = 384;
     let image_height: i32 = (image_width as f32 / aspect_ratio) as i32;
-    let samples_per_pixel: i32 = 5;
+    let samples_per_pixel: i32 = 50;
     let max_depth = 50;
 
     // PPM header
@@ -51,7 +51,7 @@ fn main() {
     world.add(Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Rc::new(Lambertian::new(Color::new(0.7, 0.3, 0.3))),
+            Rc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5))),
             )
         );
     world.add(Sphere::new(
@@ -69,7 +69,13 @@ fn main() {
     world.add(Sphere::new(
             Point3::new(-1.0, 0.0, -1.0),
             0.5,
-            Rc::new(Metal::new(Color::new(0.8, 0.8, 0.8), 1.0)),
+            Rc::new(Dielectric::new(1.5)),
+            )
+        );
+    world.add(Sphere::new(
+            Point3::new(-1.0, 0.0, -1.0),
+            -0.45,
+            Rc::new(Dielectric::new(1.5)),
             )
         );
 

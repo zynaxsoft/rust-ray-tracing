@@ -10,9 +10,32 @@ pub struct Vec3 {
     pub z: f32,
 }
 
+// Methods
 impl Vec3 {
     pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
         Vec3 {x, y, z}
+    }
+
+    pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+        v - (2.0 * dot(v, n) * n)
+    }
+
+    pub fn length_squared(&self) -> f32 {
+        self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
+    }
+
+    pub fn length(&self) -> f32 {
+        self.length_squared().sqrt()
+    }
+}
+
+// Utilities
+impl Vec3 {
+    pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f32) -> Vec3 {
+        let cos_theta = dot(-uv, n);
+        let r_out_parallel = etai_over_etat * (uv + cos_theta*n);
+        let r_out_perp = -(1.0 - r_out_parallel.length_squared()).sqrt() * n;
+        r_out_parallel + r_out_perp
     }
 
     pub fn random() -> Vec3 {
@@ -55,17 +78,6 @@ impl Vec3 {
         Vec3::new(r*a.cos(), r*a.sin(), z)
     }
 
-    pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
-        v - (2.0 * dot(v, n) * n)
-    }
-
-    pub fn length_squared(&self) -> f32 {
-        self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
-    }
-
-    pub fn length(&self) -> f32 {
-        self.length_squared().sqrt()
-    }
 }
 
 ////////////
