@@ -1,5 +1,7 @@
 # Ray Tracing in One Weekend
 
+![](https://github.com/zynaxsoft/rust-ray-tracing/raw/master/example.png)
+
 My work on following the implementation of [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) in Rust!
 
 The code simply follows the designs and the guidelines of the book. I am sure there are rooms of improvement to make it more Rust-like. If you have any suggestion please let me know !
