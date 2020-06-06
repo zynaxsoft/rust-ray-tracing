@@ -1,7 +1,7 @@
 use std::io::stdout;
 use std::rc::Rc;
 
-use raytrace::vec3::{Color, Point3, unit_vector};
+use raytrace::vec3::{Vec3, Color, Point3, unit_vector};
 use raytrace::ray::Ray;
 use raytrace::util::{write_color, INFINITY, random_number};
 use raytrace::hittable::{HitRecord, HittableList};
@@ -41,13 +41,26 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let image_width: i32 = 384;
     let image_height: i32 = (image_width as f32 / aspect_ratio) as i32;
-    let samples_per_pixel: i32 = 50;
+    let samples_per_pixel: i32 = 5;
     let max_depth = 50;
 
     // PPM header
     println!("P3\n{} {}\n255", image_width, image_height);
 
     let mut world = HittableList::new();
+    // let r = (raytrace::util::PI / 4.0).cos();
+    // world.add(Sphere::new(
+    //         Point3::new(-r, 0.0, -1.0),
+    //         r,
+    //         Rc::new(Lambertian::new(Color::new(0.0, 0.0, 1.0))),
+    //         )
+    //     );
+    // world.add(Sphere::new(
+    //         Point3::new(r, 0.0, -1.0),
+    //         r,
+    //         Rc::new(Lambertian::new(Color::new(1.0, 0.0, 0.0))),
+    //         )
+    //     );
     world.add(Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
@@ -79,7 +92,13 @@ fn main() {
             )
         );
 
-    let cam = Camera::new();
+    let cam = Camera::new(
+        Point3::new(-2.0, 2.0, 1.0),
+        Point3::new(0.0, 0.0, -1.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        aspect_ratio,
+        );
 
     for j in (0..image_height).rev() {
         eprint!("\r                           ");
